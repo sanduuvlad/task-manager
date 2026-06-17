@@ -1,9 +1,13 @@
 package service
 
 import (
+	"errors"
 	"myprojects/internal/models"
 	"myprojects/internal/repository"
 )
+
+var ErrUsersNotFounf = errors.New("users not found")
+var ErrInvalidTask = errors.New("Invalid task")
 
 type UserService struct {
 	Repo *repository.UserRepository
@@ -22,5 +26,14 @@ func (s *UserService) CreateUser(user models.User) error {
 }
 
 func (s *UserService) GetAllUsers() ([]models.User, error) {
-	return s.Repo.GetAllUsers()
+	users, err := s.Repo.GetAllUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) == 0 {
+		return nil, ErrUsersNotFounf
+	}
+
+	return users, nil
 }
