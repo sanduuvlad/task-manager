@@ -89,3 +89,24 @@ func (repo *UserRepository) GetAllUsers() ([]models.User, error) {
 
 	return users, nil
 }
+
+func (repo *UserRepository) GetUserByEmail(email string) (models.User, error) {
+	var user models.User
+
+	query := `
+		SELECT id, username, email, password_hash, created_at
+		FROM users
+		WHERE email = $1
+	`
+
+	err := repo.pool.QueryRow(
+		context.Background(), query, email).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.PasswordHash,
+		&user.CreatedAt,
+	)
+
+	return user, err
+}
