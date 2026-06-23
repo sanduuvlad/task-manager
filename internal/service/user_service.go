@@ -2,24 +2,28 @@ package service
 
 import (
 	"errors"
+	"myprojects/internal/config"
 	"myprojects/internal/dto"
+	"myprojects/internal/jwt"
 	"myprojects/internal/models"
 	"myprojects/internal/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-var ErrUsersNotFound = errors.New("users not found")
+var ErrUsersNotFound = errors.New("Users not found")
 var ErrInvalidTask = errors.New("Invalid task")
 var ErrUserAlreadyExists = errors.New("not exist email")
 
 type UserService struct {
 	Repo UserRepository
+	Cfg  *config.Config
 }
 
-func NewUserService(repo UserRepository) *UserService {
+func NewUserService(repo UserRepository, cfg *config.Config) *UserService {
 	return &UserService{
 		Repo: repo,
+		Cfg:  cfg,
 	}
 }
 
@@ -84,4 +88,30 @@ func (s *UserService) GetAllUsers() ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+func (s *UserService) Login(req dto.LoginRequest) (string, error) {
+	user, err := s.Repo.GetUserByEmail(req.Email)
+	if err != nil {
+		return "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(user.PasswordHash),
+		[]byte(req.Password),
+	)
+	if err != nil {
+		return "", errors.New("Invalid credentials")
+	}
+
+	token, err := jwt.GenerateToken(
+		user.ID,
+		user.Email,
+		s.Cfg.JWTSecret,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }

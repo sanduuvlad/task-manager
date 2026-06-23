@@ -7,8 +7,8 @@ type Config struct {
 	JWTSecret   string
 }
 
-func Load() Config {
-	return Config{
+func Load() *Config {
+	return &Config{
 		DATABASEUrl: os.Getenv("DATABASE_URL"),
 		JWTSecret:   os.Getenv("JWT_SECRET"),
 	}

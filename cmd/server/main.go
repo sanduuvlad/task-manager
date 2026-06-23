@@ -27,7 +27,7 @@ func main() {
 	taskRepo := repository.NewTaskRepository(pool)
 
 	userRepo := repository.NewUserRepository(pool)
-	userService := service.NewUserService(userRepo)
+	userService := service.NewUserService(userRepo, cfg)
 
 	taskHandler := handler.TaskHandler{
 		Repo: taskRepo,
