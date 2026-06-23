@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"myprojects/internal/models"
+	"myprojects/internal/dto"
 	"myprojects/internal/service"
 	"net/http"
 	"strconv"
@@ -45,15 +45,15 @@ func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var req dto.CreateUserRequest
 
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	err = h.Service.CreateUser(user)
+	err = h.Service.CreateUser(req)
 	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return

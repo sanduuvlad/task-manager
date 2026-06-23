@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"myprojects/internal/config"
 	"myprojects/internal/database"
 	"myprojects/internal/handler"
 	"myprojects/internal/middleware"
@@ -10,12 +11,17 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	pool, err := database.Connect()
+	_ = godotenv.Load()
+
+	cfg := config.Load()
+
+	pool, err := database.Connect(cfg.DATABASEUrl)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	taskRepo := repository.NewTaskRepository(pool)
