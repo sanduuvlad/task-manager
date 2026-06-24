@@ -66,3 +66,26 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		"message": "user created",
 	})
 }
+
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var req dto.LoginRequest
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.Service.Login(req)
+	if err != nil {
+		http.Error(w, "error", http.StatusUnauthorized) // ошибка логина(401)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"token": token,
+	})
+}
