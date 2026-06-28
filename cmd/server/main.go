@@ -49,9 +49,9 @@ func main() {
 	router.Delete("/tasks/{id}", taskHandler.DeleteTaskByID)
 	router.Patch("/tasks/{id}", taskHandler.PatchTaskByID)
 
-	router.Get("/users", userHandler.GetAllUsers)
-	router.Post("/users", userHandler.CreateUser)
 	router.Get("/users/{id}", userHandler.GetUserByID)
+	router.Post("/users", userHandler.CreateUser)
+	router.Get("/users", userHandler.GetAllUsers)
 	router.Post("/login", userHandler.Login)
 
 	log.Println("Server started on :8080")

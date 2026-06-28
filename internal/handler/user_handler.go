@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"myprojects/internal/dto"
 	"myprojects/internal/service"
 	"net/http"
@@ -36,7 +37,8 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.Service.GetAllUsers()
 	if err != nil {
-		http.Error(w, "Internal error", http.StatusInternalServerError) // status code 500
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError) // status code 500
 		return
 	}
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"myprojects/internal/models"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -45,9 +46,11 @@ func (repo *UserRepository) GetUserByID(id int64) (models.User, error) {
 func (repo *UserRepository) CreateUser(user models.User) error {
 	_, err := repo.pool.Exec(
 		context.Background(),
-		"INSERT INTO users (username, email) VALUES ($1, $2)",
+		`INSERT INTO users (username, email, password_hash) 
+		VALUES ($1, $2, $3)`,
 		user.Username,
 		user.Email,
+		user.PasswordHash,
 	)
 	if err != nil {
 		return err
@@ -61,7 +64,8 @@ func (repo *UserRepository) GetAllUsers() ([]models.User, error) {
 
 	rows, err := repo.pool.Query(
 		context.Background(),
-		"SELECT id, usermname, email FROM users",
+		`SELECT id, username, email, created_at
+		FROM users`,
 	)
 	if err != nil {
 		return nil, err
@@ -70,18 +74,16 @@ func (repo *UserRepository) GetAllUsers() ([]models.User, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id int64
-		var username, email string
+		var user models.User
 
-		err = rows.Scan(&id, &username, &email)
+		err = rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.CreatedAt,
+		)
 		if err != nil {
 			return nil, err
-		}
-
-		user := models.User{
-			ID:       id,
-			Username: username,
-			Email:    email,
 		}
 
 		users = append(users, user)
@@ -103,7 +105,10 @@ func (repo *UserRepository) GetUserByEmail(email string) (models.User, error) {
 	`
 
 	err := repo.pool.QueryRow(
-		context.Background(), query, email).Scan(
+		context.Background(),
+		query,
+		email,
+	).Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
@@ -111,5 +116,12 @@ func (repo *UserRepository) GetUserByEmail(email string) (models.User, error) {
 		&user.CreatedAt,
 	)
 
-	return user, err
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.User{}, ErrUserNotFound
+		}
+		return models.User{}, err
+	}
+
+	return user, nil
 }

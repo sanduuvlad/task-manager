@@ -52,7 +52,7 @@ func (s *UserService) CreateUser(req dto.CreateUserRequest) error {
 	}
 
 	_, err := s.Repo.GetUserByEmail(req.Email)
-	if err != nil {
+	if err == nil {
 		return ErrUserAlreadyExists
 	}
 
@@ -68,13 +68,13 @@ func (s *UserService) CreateUser(req dto.CreateUserRequest) error {
 		return err
 	}
 
-	user := models.User{
+	newUser := models.User{
 		Username:     req.Username,
 		Email:        req.Email,
 		PasswordHash: string(hash),
 	}
 
-	return s.Repo.CreateUser(user)
+	return s.Repo.CreateUser(newUser)
 }
 
 func (s *UserService) GetAllUsers() ([]models.User, error) {
