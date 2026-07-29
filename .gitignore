@@ -1,4 +1,5 @@
 .env
+.git
 bin/
 *.exe
 *.log
